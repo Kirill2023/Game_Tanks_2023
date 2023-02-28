@@ -195,7 +195,7 @@ int main()
         glfwSwapBuffers(window);
         Sleep(10);
         countr++;
-        if (countr > 5000)
+        if (countr > 60000)
         {
             std::cout << "Время вышло. Выход из программы";
             break;
