@@ -60,7 +60,6 @@ namespace tank
 
 
 
-
     class Object;
     typedef std::map<uint16_t, pObject> Registry;
 
@@ -80,43 +79,13 @@ namespace tank
     {
     public:
 
-        static pObject createObject(Type_ID _type, SubType_ID _subtype)
-        {
-            uint16_t id = (static_cast<uint16_t>(_type) << 8) | static_cast<uint16_t>(_subtype);
-            Registry& r = getRegistry();
+        static pObject createObject(Type_ID _type, SubType_ID _subtype);
 
-            if (r.find(id) != r.end())
-                return r[id]->clone();
-            return nullptr;
-        }
+        static void addPrototype(SubType_ID _subtype, pObject prototype);  // Добавление прототипа в множество прототипов
+     
+        static void removePrototype(Type_ID _type, SubType_ID _subtype);   // Удаление прототипа из множества прототипов
 
-        // Добавление прототипа в множество прототипов
-        static void addPrototype(SubType_ID _subtype, pObject prototype)
-        {
-            prototype->subtype = _subtype;
-            uint16_t id = (static_cast<uint16_t>(prototype->type) << 8) | static_cast<uint16_t>(prototype->subtype);
-            Registry& r = getRegistry();
-            r[id] = prototype;
-        }
-
-        // Удаление прототипа из множества прототипов
-        static void removePrototype(Type_ID _type, SubType_ID _subtype) {
-            uint16_t id = (static_cast<uint16_t>(_type) << 8) | static_cast<uint16_t>(_subtype);
-            Registry& r = getRegistry();
-            r.erase(r.find(id));
-        }
-
-        static void Collision_test(vpObject& obj1, vpObject& obj2) // Обнаружение столкновения
-        {
-            if (&obj1 == &obj2)
-                for (int x = 0; x + 1 < obj1.size(); ++x)
-                    for (int y = x + 1; y < obj2.size(); ++y)
-                        Object::Collision_test(*(obj1[x]), *(obj2[y]));
-            else
-                for (auto& x : obj1)
-                    for (auto& y : obj2)
-                        Object::Collision_test(*x, *y);
-        }
+        static void Collision_test(vpObject& obj1, vpObject& obj2); // Обнаружение столкновения
 
 
         class Event;
@@ -172,26 +141,17 @@ namespace tank
         } state;
 
 
-        virtual void set_Ref(vec3 r)
-        {
-            geometry.ref = r;
-            geometry.location = r;
-        }
+        
 
-        virtual vec3 get_Ref()
-        {
-            return geometry.ref;
-        }
+        virtual void set_Ref(vec3 r);
 
-        virtual void set_Direction(int r)
-        {
-            geometry.direction = r;
-        }
+        virtual vec3 get_Ref();
 
-        virtual int get_Direction()
-        {
-            return geometry.direction;
-        }
+        virtual void set_Direction(int r);
+
+        virtual int get_Direction();
+
+        virtual ~Object() = 0;
 
         virtual pObject clone() = 0;
 

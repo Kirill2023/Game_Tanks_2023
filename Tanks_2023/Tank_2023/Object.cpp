@@ -31,6 +31,80 @@ namespace tank
 
 
 
+
+
+
+
+
+    pObject Object::createObject(Type_ID _type, SubType_ID _subtype)
+    {
+        uint16_t id = (static_cast<uint16_t>(_type) << 8) | static_cast<uint16_t>(_subtype);
+        Registry& r = getRegistry();
+
+        if (r.find(id) != r.end())
+            return r[id]->clone();
+        return nullptr;
+    }
+
+    // ƒобавление прототипа в множество прототипов
+    void Object::addPrototype(SubType_ID _subtype, pObject prototype)
+    {
+        prototype->subtype = _subtype;
+        uint16_t id = (static_cast<uint16_t>(prototype->type) << 8) | static_cast<uint16_t>(prototype->subtype);
+        Registry& r = getRegistry();
+        r[id] = prototype;
+    }
+
+    // ”даление прототипа из множества прототипов
+    void Object::removePrototype(Type_ID _type, SubType_ID _subtype) {
+        uint16_t id = (static_cast<uint16_t>(_type) << 8) | static_cast<uint16_t>(_subtype);
+        Registry& r = getRegistry();
+        r.erase(r.find(id));
+    }
+
+    void Object::Collision_test(vpObject& obj1, vpObject& obj2) // ќбнаружение столкновени€
+    {
+        if (&obj1 == &obj2)
+            for (int x = 0; x + 1 < obj1.size(); ++x)
+                for (int y = x + 1; y < obj2.size(); ++y)
+                    Object::Collision_test(*(obj1[x]), *(obj2[y]));
+        else
+            for (auto& x : obj1)
+                for (auto& y : obj2)
+                    Object::Collision_test(*x, *y);
+    }
+
+
+
+
+
+
+
+
+
+    void Object::set_Ref(vec3 r)
+    {
+        geometry.ref = r;
+        geometry.location = r;
+    }
+
+    vec3 Object::get_Ref()
+    {
+        return geometry.ref;
+    }
+
+    void Object::set_Direction(int r)
+    {
+        geometry.direction = r;
+    }
+
+    int Object::get_Direction()
+    {
+        return geometry.direction;
+    }
+
+
+
     void Object::make(CMD _cmd )
     {
         static int t = 0;
@@ -95,7 +169,7 @@ namespace tank
         ++countr;
     }
 
-
+    Object::~Object() {};
 
     void Object::Revival()
     {

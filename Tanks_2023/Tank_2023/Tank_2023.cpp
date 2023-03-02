@@ -39,6 +39,7 @@ const int Num = 10;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void Do_Movement();
 
 // Camera
@@ -46,6 +47,7 @@ Camera camera(glm::vec3(3.0f, 3.0f, 3.0f));
 bool keys[1024];
 GLfloat lastX = 600, lastY = 400;
 bool firstMouse = true;
+bool MOUSE_BUTTON_LEFT = false;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
@@ -77,6 +79,8 @@ int main()
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+
 
     // Options
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -236,6 +240,11 @@ void Do_Movement()
         camera.ProcessKeyboard(LEFT, deltaTime * 4);
     if ((keys[GLFW_KEY_D] || keys[GLFW_KEY_RIGHT]) && keys[GLFW_KEY_LEFT_SHIFT])
         camera.ProcessKeyboard(RIGHT, deltaTime * 4);
+
+       
+      
+
+
 }
 
 // Is called whenever a key is pressed/released via GLFW
@@ -253,22 +262,36 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        if (action == GLFW_PRESS)
+            MOUSE_BUTTON_LEFT = true;
+        else if (action == GLFW_RELEASE)
+            MOUSE_BUTTON_LEFT = false;
+    }
+}
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (firstMouse)
+    if (MOUSE_BUTTON_LEFT)
     {
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+        GLfloat xoffset = xpos - lastX;
+        GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
         lastX = xpos;
         lastY = ypos;
-        firstMouse = false;
+        camera.ProcessMouseMovement(xoffset, yoffset);
     }
-
-    GLfloat xoffset = xpos - lastX;
-    GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    else
+        firstMouse = true;
 }
 
 
